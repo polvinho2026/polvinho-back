@@ -30,7 +30,7 @@ export async function up(knex) {
  * @returns { Promise<void> }
  */
 export async function down(knex) {
-    await knex.schema.dropTable('users');
+    await knex.schema.dropTableIfExists('users');
 
     await knex.raw(`DROP TYPE IF EXISTS role_types;`);
 };
