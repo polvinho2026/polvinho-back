@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 export async function up(knex) {
-    return knex.schema.createtable('assignments', (table) =>{
+    return knex.schema.createTable('assignments', (table) =>{
         table.uuid('id').primary().defaultTo(knex.fn.uuid());
         table.uuid('created_by')
             .nullable()
@@ -11,6 +11,7 @@ export async function up(knex) {
             .inTable('users')
             .onDelete('SET NULL');
         table.uuid('id_subject')
+            .notNullable()
             .references('id')
             .inTable('subjects')
             .onDelete('CASCADE');
@@ -28,6 +29,6 @@ export async function up(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-export async function up(knex) {
-  
+export async function down(knex) {
+    return knex.schema.dropTable('assignments');
 };
