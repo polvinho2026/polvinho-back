@@ -13,10 +13,15 @@ const findByEmail = async (email) => {
 
 const findByCPF = async (cpf) => {
     return await db(TABLE_NAME).where({ cpf }).first();
-}
+};
+
+const findByRegistration = async (cpf) => {
+    return await db(TABLE_NAME).where({ cpf }).first();
+};
 
 export default {
     create,
     findByEmail,
-    findByCPF
+    findByCPF,
+    findByRegistration
 };

@@ -3,15 +3,15 @@ import { validateDateISO } from "../utils/validateDateISO.js";
 
 const create = async (req, res) => {
     try {
-        const { name, email, cpf, birth_date, registration, role } = req.body
+        const { name, email, cpf, birth_date, registration, role } = req.body;
 
         if (!name || !email || !cpf || !birth_date || !registration || !role) {
             throw new Error('Nome, email, cpf, data de nascimento, matrícula, papel e senha são obrigatórios.');
         };
 
         if (!validateDateISO(birth_date)) {
-            throw new Error('Data deve ser no formato YYYY-MM-DD.')
-        }
+            throw new Error('Data deve ser no formato YYYY-MM-DD.');
+        };
 
         const newUser = await usersService.createUser({
             name,
@@ -26,10 +26,10 @@ const create = async (req, res) => {
     } catch (error) {
         return res.status(400).json({
             message: error.message
-        })
-    }
-}
+        });
+    };
+};
 
 export default {
     create,
-}
+};
