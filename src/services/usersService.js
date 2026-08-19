@@ -52,6 +52,39 @@ const createUser = async ({ name, email, cpf, birth_date, registration, role }) 
     return newUser;
 };
 
+const listUsers = async (data) => {
+    const { page, name, registration, role, includeExcluded, loggedUser } = data;
+
+    let finalIncludeExcluded = false; 
+    let allowedUserIds; 
+
+    // restrição de acesso: apenas usuários com papel "admin" ou "coordinator" podem ver usuários excluídos ou todos os usuários.
+    if (loggedUser.role === 'admin' || loggedUser.role === 'coordinator') {
+        finalIncludeExcluded = includeExcluded === 'true' || includeExcluded === true;
+    }
+
+    else if (loggedUser.role === 'student' || loggedUser.role === 'professor') {
+        finalIncludeExcluded = false;
+        // TODO: buscar IDs dos colegas. 
+    }
+
+    const usersData = await usersModel.list({
+    page,
+    name,
+    registration,
+    role,
+    includeExcluded: finalIncludeExcluded,
+    allowedUserIds
+  });
+
+  return usersData;
+
+}
+
+
+
+
 export default {
     createUser,
+    listUsers
 };
