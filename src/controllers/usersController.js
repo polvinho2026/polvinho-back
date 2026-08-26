@@ -32,19 +32,18 @@ const create = async (req, res) => {
 
 const list = async (req, res) => {
     try {
-        console.log('1. são essas informações que chegaram do usuário externo que está solicitando a lista:', req);
-        console.log('2. são essas informações que o usuário está me fornecendo', req.query);
-        const { page, name, registration, role, includeExcluded } = req.query;
+        const { page, limit, name, registration, role, includeExcluded } = req.query;
         const loggedUser = { id: 1, role: 'admin' }
         const users = await usersService.listUsers({
             page,
+            limit,
             name,
             registration,
             role,
             includeExcluded,
             loggedUser
         });
-        console.log('5. são essas informações que chegaram do model para o controller:', users);
+
         return res.status(200).json(users);
 
     } catch (error) {
@@ -54,8 +53,32 @@ const list = async (req, res) => {
     }
 };
 
+const show = async (req, res) => {
+    const { id } = req.params 
+
+    const loggedUser = {
+        email: 'ramiro@gmail.com',
+        name: 'Ronaldo Fenomeno',
+        cpf: '03857682060',
+        registration: '1234567890',
+        birth_date: '2002-02-02',
+        role: 'student',
+    }
+
+    try {
+        const userData = await usersService.showUser({id, loggedUser})
+    
+        return res.status(200).json(userData)
+    } catch(error) {
+        return res.status(400).json({
+            message: error.message
+        })
+    }
+
+}
+
 export default {
     create, 
     list,
+    show
 };
-

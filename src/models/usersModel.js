@@ -9,6 +9,10 @@ const create = async (userData) => {
     return newUser;
 };
 
+const findById = async (id) => {
+    return await db(TABLE_NAME).where({ id }).first()
+}
+
 const findByEmail = async (email) => {
     return await db(TABLE_NAME).where({ email }).first();
 };
@@ -17,8 +21,8 @@ const findByCPF = async (cpf) => {
     return await db(TABLE_NAME).where({ cpf }).first();
 };
 
-const findByRegistration = async (cpf) => {
-    return await db(TABLE_NAME).where({ cpf }).first();
+const findByRegistration = async (registration) => {
+    return await db(TABLE_NAME).where({ registration }).first();
 };
 
 const findColleaguesIds = async (userId) => {
@@ -37,9 +41,9 @@ const findColleaguesIds = async (userId) => {
 
 
 const list = async (params) => {
-    console.log('3. são essas informações que chegaram no model:', params);
     const { 
         page = 1,
+        limit = 20,
         name, 
         registration, 
         role,
@@ -47,44 +51,64 @@ const list = async (params) => {
         allowedUserIds
     } = params;
 
-// define o limite de registros por página
-    const limit = 20; 
     const offset = (page - 1) * limit;
 
-// buscando no banco. 
-    const query = db(TABLE_NAME).select('name', 'registration', 'role');
+    const query = db(TABLE_NAME);
+
     if (!includeExcluded) {
-    query.whereNull('deleted_at'); 
-  }
+        query.whereNull('deleted_at'); 
+    }
 
-  if (name) {
-    query.where('name', 'ilike', `%${name}%`); 
-  }
-  if (registration) {
-    query.where('registration', 'ilike', `%${registration}%`);
-  }
+    if (name) {
+        query.where('name', 'ilike', `%${name}%`); 
+    }
 
-  if (role) {
-    query.where('role', role);
-  }
+    if (registration) {
+        query.where('registration', 'ilike', `%${registration}%`);
+    }
+
+    if (role) {
+        query.where('role', role);
+    }
 
   if (allowedUserIds) {
     query.whereIn('id', allowedUserIds);
   }
 
-  query.limit(limit).offset(offset);
+    const usersQuery = query
+        .clone()
+        .select('id', 'name', 'email', 'registration', 'role')
+        .orderBy('name', 'asc')
+        .orderBy('id', 'asc')
+        .limit(limit)
+        .offset(offset);
 
-  console.log('4. dados retornados do model:', await query.toString());
+    const countQuery = query
+        .clone()
+        .count({ total: 'id' })
+        .first();
 
-  return await query;
+    const [users, countResult] = await Promise.all([usersQuery, countQuery]);
+    const totalItems = Number(countResult.total);
+    const totalPages = Math.max(1, Math.ceil(totalItems / limit));
+
+    return {
+        data: users,
+        pagination: {
+            page,
+            limit,
+            totalItems,
+            totalPages
+        }
+    };
 };
 
 export default {
     create,
+    findById,
     findByEmail,
     findByCPF,
     findByRegistration,
     findColleaguesIds,
     list
 };
-
