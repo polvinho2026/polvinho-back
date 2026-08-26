@@ -21,6 +21,21 @@ const findByRegistration = async (cpf) => {
     return await db(TABLE_NAME).where({ cpf }).first();
 };
 
+const findColleaguesIds = async (userId) => {
+    const userSubjectsQuery = db('users_subjects')
+         .select('subject_id')
+         .where('user_id', userId)
+         .whereNull('deleted_at');
+
+    const colleagues = await db('users_subjects')
+        .distinct('user_id')
+        .whereIn('subject_id', userSubjectsQuery)
+        .whereNull('deleted_at');
+    
+    return colleagues.map(colleague => colleague.user_id);
+};
+
+
 const list = async (params) => {
     console.log('3. são essas informações que chegaram no model:', params);
     const { 
@@ -29,7 +44,7 @@ const list = async (params) => {
         registration, 
         role,
         includeExcluded = false,
-        //allowedUserIds
+        allowedUserIds
     } = params;
 
 // define o limite de registros por página
@@ -53,9 +68,9 @@ const list = async (params) => {
     query.where('role', role);
   }
 
-//   if (allowedUserIds) {
-//     query.whereIn('id', allowedUserIds);
-//   }
+  if (allowedUserIds) {
+    query.whereIn('id', allowedUserIds);
+  }
 
   query.limit(limit).offset(offset);
 
@@ -69,6 +84,7 @@ export default {
     findByEmail,
     findByCPF,
     findByRegistration,
+    findColleaguesIds,
     list
 };
 

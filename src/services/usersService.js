@@ -65,7 +65,8 @@ const listUsers = async (data) => {
 
     else if (loggedUser.role === 'student' || loggedUser.role === 'professor') {
         finalIncludeExcluded = false;
-        // TODO: buscar IDs dos colegas. 
+        const colleaguesIds = await usersModel.findColleaguesIds(loggedUser.id);
+        allowedUserIds = colleaguesIds || []; 
     }
 
     const usersData = await usersModel.list({
@@ -78,9 +79,7 @@ const listUsers = async (data) => {
   });
 
   return usersData;
-
 }
-
 
 
 
