@@ -53,7 +53,18 @@ const createUser = async ({ name, email, cpf, birth_date, registration, role }) 
 };
 
 const listUsers = async (data) => {
-    const { page, name, registration, role, includeExcluded, loggedUser } = data;
+    const { page = 1, limit = 20, name, registration, role, includeExcluded, loggedUser } = data;
+
+    const normalizedPage = Number(page);
+    const normalizedLimit = Number(limit);
+
+    if (!Number.isInteger(normalizedPage) || normalizedPage < 1) {
+        throw new Error('Página deve ser um número inteiro maior ou igual a 1.');
+    }
+
+    if (!Number.isInteger(normalizedLimit) || normalizedLimit < 1 || normalizedLimit > 100) {
+        throw new Error('Limite deve ser um número inteiro entre 1 e 100.');
+    }
 
     let finalIncludeExcluded = false; 
     let allowedUserIds; 
@@ -65,26 +76,65 @@ const listUsers = async (data) => {
 
     else if (loggedUser.role === 'student' || loggedUser.role === 'professor') {
         finalIncludeExcluded = false;
-        // TODO: buscar IDs dos colegas. 
     }
 
     const usersData = await usersModel.list({
-    page,
-    name,
-    registration,
-    role,
-    includeExcluded: finalIncludeExcluded,
-    allowedUserIds
-  });
+        page: normalizedPage,
+        limit: normalizedLimit,
+        name,
+        registration,
+        role,
+        includeExcluded: finalIncludeExcluded,
+        allowedUserIds
+    });
 
-  return usersData;
+    return usersData;
 
 }
 
+const showUser = async ({ id, loggedUser }) => {
+    // verificações para mostrar detalhes de um usuário
+    // 1 - informações devem ser diferentes dependendo da role do requisitor
+    if(!loggedUser) {
+        throw new Error('Não autorizado.')
+    }
+    
+    const userData = await usersModel.findById(id)
 
+    if(!userData) {
+        throw new Error('Usuário não encontrado.')
+    }
 
+    const { name, email, registration, role, birth_date, cpf, deleted_at } = userData
+
+    if(loggedUser.role === 'student' || loggedUser.role === 'professor') {
+
+        if (deleted_at) {
+            throw new Error('Não autorizado.')
+        }
+
+        return {
+            name,
+            email,
+            registration,
+            role
+        }
+
+    }
+    
+    return {
+        name,
+        email,
+        registration,
+        role,
+        birth_date,
+        cpf,
+        deleted_at
+    }
+}
 
 export default {
     createUser,
-    listUsers
+    listUsers,
+    showUser
 };
