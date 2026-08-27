@@ -25,6 +25,21 @@ const findByRegistration = async (registration) => {
     return await db(TABLE_NAME).where({ registration }).first();
 };
 
+const findColleaguesIds = async (userId) => {
+    const userSubjectsQuery = db('users_subjects')
+         .select('subject_id')
+         .where('user_id', userId)
+         .whereNull('deleted_at');
+
+    const colleagues = await db('users_subjects')
+        .distinct('user_id')
+        .whereIn('subject_id', userSubjectsQuery)
+        .whereNull('deleted_at');
+    
+    return colleagues.map(colleague => colleague.user_id);
+};
+
+
 const list = async (params) => {
     const { 
         page = 1,
@@ -33,7 +48,7 @@ const list = async (params) => {
         registration, 
         role,
         includeExcluded = false,
-        //allowedUserIds
+        allowedUserIds
     } = params;
 
     const offset = (page - 1) * limit;
@@ -56,9 +71,9 @@ const list = async (params) => {
         query.where('role', role);
     }
 
-//   if (allowedUserIds) {
-//     query.whereIn('id', allowedUserIds);
-//   }
+  if (allowedUserIds) {
+    query.whereIn('id', allowedUserIds);
+  }
 
     const usersQuery = query
         .clone()
@@ -94,5 +109,6 @@ export default {
     findByEmail,
     findByCPF,
     findByRegistration,
+    findColleaguesIds,
     list
 };

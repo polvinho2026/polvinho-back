@@ -76,6 +76,8 @@ const listUsers = async (data) => {
 
     else if (loggedUser.role === 'student' || loggedUser.role === 'professor') {
         finalIncludeExcluded = false;
+        const colleaguesIds = await usersModel.findColleaguesIds(loggedUser.id);
+        allowedUserIds = colleaguesIds || []; 
     }
 
     const usersData = await usersModel.list({
@@ -88,8 +90,7 @@ const listUsers = async (data) => {
         allowedUserIds
     });
 
-    return usersData;
-
+  return usersData;
 }
 
 const showUser = async ({ id, loggedUser }) => {
