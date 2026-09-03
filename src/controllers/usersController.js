@@ -32,8 +32,12 @@ const create = async (req, res) => {
 
 const list = async (req, res) => {
     try {
+        // pegando os filtros da URL 
         const { page, limit, name, registration, role, includeExcluded } = req.query;
-        const loggedUser = { id: 1, role: 'admin' }
+        
+        // será usado depois para verificar se o usuário logado tem permissão de ver todos os usuários ou apenas os que ele tem acesso (autenticação)
+        const loggedUser = { id: 1, role: 'admin' }; 
+
         const users = await usersService.listUsers({
             page,
             limit,

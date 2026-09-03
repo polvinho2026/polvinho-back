@@ -2,7 +2,7 @@
   "name": "polvinteste",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/server.js", 
   "scripts": {
     "dev": "nodemon src/server.js",
     "db:reset": "knex migrate:rollback --all && knex migrate:latest",
