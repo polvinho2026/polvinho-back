@@ -81,8 +81,40 @@ const show = async (req, res) => {
 
 }
 
+const update = async (req, res) => {
+
+    try {
+    const { id } = req.params 
+    const { name, email, cpf, birth_date, registration, role } = req.body;
+
+    const loggedUser = { // simulação de administrador logado
+            id: 'id-ficticio-do-admin', 
+            role: 'admin' 
+        };
+
+    const updatedUser = await usersService.updateUser({
+            id,
+            loggedUser,
+            name,
+            email,
+            cpf,
+            birth_date,
+            registration,
+            role
+        });
+
+    return res.status(200).json(updatedUser);
+
+    } catch (error) {
+        return res.status(400).json({
+            message: error.message
+        });
+    }
+};
+
 export default {
     create, 
     list,
-    show
+    show,
+    update
 };

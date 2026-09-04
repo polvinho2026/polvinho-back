@@ -1,5 +1,3 @@
-// parte do backend responsável por fazer a comunicação com o banco de dados, realizando operações como criar, buscar e atualizar registros na tabela de usuários.
-
 import db from '../database/connection.js';
 
 const TABLE_NAME = 'users';
@@ -103,6 +101,17 @@ const list = async (params) => {
     };
 };
 
+const update = async (id, userData) => {
+
+    const [updatedUser] = await db(TABLE_NAME)
+        .where({ id })
+        .update(userData)
+        .returning('*');
+    
+    return updatedUser;
+};
+
+
 export default {
     create,
     findById,
@@ -110,5 +119,6 @@ export default {
     findByCPF,
     findByRegistration,
     findColleaguesIds,
-    list
+    list,
+    update
 };

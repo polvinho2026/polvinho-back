@@ -1,6 +1,8 @@
 import usersModel from '../models/usersModel.js';
 import { validateCPF } from '../utils/validateCPF.js';
+import { validateDateISO } from '../utils/validateDateISO.js';
 import bcrypt from 'bcrypt';
+
 
 const createUser = async ({ name, email, cpf, birth_date, registration, role }) => {
     const allNames = name.split(' ');
@@ -134,8 +136,76 @@ const showUser = async ({ id, loggedUser }) => {
     }
 }
 
+const updateUser = async ({ id, loggedUser, name, email, cpf, birth_date, registration, role }) => {
+
+    if(!loggedUser) {
+        throw new Error('Não autorizado.')
+    }
+
+    if (loggedUser.role !== 'admin') {
+        throw new Error('Apenas administradores podem editar usuários.');
+    }
+
+    const existingUser = await usersModel.findById(id);
+    if (!existingUser) {
+        throw new Error('Usuário não encontrado.');
+    }
+
+    if (name) {
+        const allNames = name.split(' ');
+        if (!allNames[1] || allNames[0].length < 3 || allNames[1].length < 3) {
+            throw new Error('Nome e sobrenome devem conter 3 ou mais caracteres.');
+        }
+    }
+
+    if (registration && registration.length !== 10) {
+        throw new Error('Matrícula deve conter exatamente 10 dígitos.');
+    }
+
+    if (cpf && !validateCPF(cpf)) {
+        throw new Error('CPF inválido.');
+    }
+
+    if (birth_date && !validateDateISO(birth_date)) {
+    throw new Error('Data deve ser no formato YYYY-MM-DD.');
+    }
+
+    if (email && email !== existingUser.email) {
+        const emailExists = await usersModel.findByEmail(email);
+        if (emailExists && emailExists.id !== id) {
+            throw new Error('Este e-mail já está em uso por outro usuário.');
+        }
+    }
+
+    if (cpf && cpf !== existingUser.cpf) {
+        const cpfExists = await usersModel.findByCPF(cpf);
+        if (cpfExists && cpfExists.id !== id) {
+            throw new Error('Este CPF já está cadastrado em outro usuário.');
+        }
+    }
+
+    if (registration && registration !== existingUser.registration) {
+        const registrationExists = await usersModel.findByRegistration(registration);
+        if (registrationExists && registrationExists.id !== id) {
+            throw new Error('Este número de matrícula já está em uso por outro usuário.');
+        }
+    }
+
+    const updatedUser = await usersModel.update(id, {
+        name: name || existingUser.name,
+        email: email || existingUser.email,
+        cpf: cpf || existingUser.cpf,
+        birth_date: birth_date || existingUser.birth_date,
+        registration: registration || existingUser.registration,
+        role: role || existingUser.role
+    });
+
+    return updatedUser;
+};
+
 export default {
     createUser,
     listUsers,
-    showUser
+    showUser,
+    updateUser
 };
