@@ -128,6 +128,30 @@ const findSubjectsByUserId = async (userId) => {
         .select('subjects.id', 'subjects.title');
 };
 
+const remove = async (id) => {
+    return await db.transaction(async (trx) => {
+        const now = new Date();
+
+        await trx(TABLE_NAME)
+            .where({ id })
+            .update({ deleted_at: now });
+
+        await trx('users_departments')
+            .where({ user_id: id })
+            .update({ deleted_at: now });
+
+        await trx('users_courses')
+            .where({ user_id: id })
+            .update({ deleted_at: now });
+
+        await trx('users_subjects')
+            .where({ user_id: id })
+            .update({ deleted_at: now });
+
+        return true;
+    });
+};
+
 export default {
     create,
     findById,
@@ -137,6 +161,7 @@ export default {
     findColleaguesIds,
     list,
     update,
+    remove, 
     findCourseByUserId,
     findSubjectsByUserId
 };
