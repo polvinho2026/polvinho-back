@@ -71,7 +71,7 @@ const listUsers = async (data) => {
     let finalIncludeExcluded = false; 
     let allowedUserIds; 
 
-    // restrição de acesso: apenas usuários com papel "admin" ou "coordinator" podem ver usuários excluídos ou todos os usuários.
+  
     if (loggedUser.role === 'admin' || loggedUser.role === 'coordinator') {
         finalIncludeExcluded = includeExcluded === 'true' || includeExcluded === true;
     }
@@ -96,45 +96,37 @@ const listUsers = async (data) => {
 }
 
 const showUser = async ({ id, loggedUser }) => {
-    // verificações para mostrar detalhes de um usuário
-    // 1 - informações devem ser diferentes dependendo da role do requisitor
-    if(!loggedUser) {
-        throw new Error('Não autorizado.')
-    }
+    if(!loggedUser) throw new Error('Não autorizado.');
+
+    const userData = await usersModel.findById(id);
+    if(!userData) throw new Error('Usuário não encontrado.');
+
     
-    const userData = await usersModel.findById(id)
+    const course = await usersModel.findCourseByUserId(id);
+    const subjects = await usersModel.findSubjectsByUserId(id);
 
-    if(!userData) {
-        throw new Error('Usuário não encontrado.')
+    const baseData = {
+        name: userData.name,
+        email: userData.email,
+        registration: userData.registration,
+        role: userData.role,
+        course: course ? course.title : 'Sem curso',
+        currentDisciplines: subjects.map(s => s.title), 
+        previousDisciplines: [] 
+    };
+
+    if (loggedUser.role === 'student' || loggedUser.role === 'professor') {
+        if (userData.deleted_at) throw new Error('Não autorizado.');
+        return baseData;
     }
 
-    const { name, email, registration, role, birth_date, cpf, deleted_at } = userData
-
-    if(loggedUser.role === 'student' || loggedUser.role === 'professor') {
-
-        if (deleted_at) {
-            throw new Error('Não autorizado.')
-        }
-
-        return {
-            name,
-            email,
-            registration,
-            role
-        }
-
-    }
-    
     return {
-        name,
-        email,
-        registration,
-        role,
-        birth_date,
-        cpf,
-        deleted_at
-    }
-}
+        ...baseData,
+        birth_date: userData.birth_date,
+        cpf: userData.cpf,
+        deleted_at: userData.deleted_at
+    };
+};
 
 const updateUser = async ({ id, loggedUser, name, email, cpf, birth_date, registration, role }) => {
 

@@ -111,6 +111,22 @@ const update = async (id, userData) => {
     return updatedUser;
 };
 
+const findCourseByUserId = async (userId) => {
+    return await db('courses')
+        .join('users_courses', 'courses.id', 'users_courses.course_id')
+        .where('users_courses.user_id', userId)
+        .whereNull('users_courses.deleted_at')
+        .select('courses.title')
+        .first();
+};
+
+const findSubjectsByUserId = async (userId) => {
+    return await db('subjects')
+        .join('users_subjects', 'subjects.id', 'users_subjects.subject_id')
+        .where('users_subjects.user_id', userId)
+        .whereNull('users_subjects.deleted_at')
+        .select('subjects.id', 'subjects.title');
+};
 
 export default {
     create,
@@ -120,5 +136,7 @@ export default {
     findByRegistration,
     findColleaguesIds,
     list,
-    update
+    update,
+    findCourseByUserId,
+    findSubjectsByUserId
 };
