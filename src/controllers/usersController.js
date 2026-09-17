@@ -87,7 +87,7 @@ const update = async (req, res) => {
     const { id } = req.params 
     const { name, email, cpf, birth_date, registration, role } = req.body;
 
-    const loggedUser = { // simulação de administrador logado
+    const loggedUser = { // simulação de administrador logado, para teste
             id: 'id-ficticio-do-admin', 
             role: 'admin' 
         };
