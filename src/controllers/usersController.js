@@ -112,9 +112,29 @@ const update = async (req, res) => {
     }
 };
 
+const remove = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+       // SIMULAÇÃO DE USUÁRIO LOGADO (ADMINISTRADOR) PARA TESTE
+        const loggedUser = { 
+            id: 'id-ficticio-do-admin', 
+            role: 'admin' 
+        };
+
+        const result = await usersService.deleteUser({ id, loggedUser });
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({
+            message: error.message
+        });
+    }
+};
+
 export default {
     create, 
     list,
     show,
-    update
+    update,
+    remove 
 };

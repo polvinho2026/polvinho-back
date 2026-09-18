@@ -195,9 +195,33 @@ const updateUser = async ({ id, loggedUser, name, email, cpf, birth_date, regist
     return updatedUser;
 };
 
+const deleteUser = async ({ id, loggedUser }) => {
+    if (!loggedUser) {
+        throw new Error('Não autorizado.');
+    }
+
+    if (loggedUser.role !== 'admin') {
+        throw new Error('Apenas administradores podem excluir usuários.');
+    }
+
+    const existingUser = await usersModel.findById(id);
+    if (!existingUser) {
+        throw new Error('Usuário não encontrado.');
+    }
+    
+    if (existingUser.deleted_at !== null) {
+        throw new Error('Este usuário já foi excluído.');
+    }
+
+    await usersModel.remove(id);
+    
+    return { message: 'Usuário e vínculos excluídos com sucesso.' };
+};
+
 export default {
     createUser,
     listUsers,
     showUser,
-    updateUser
+    updateUser,
+    deleteUser
 };
