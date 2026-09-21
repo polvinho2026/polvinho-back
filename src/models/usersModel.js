@@ -62,16 +62,17 @@ const list = async (params) => {
     }
 
     if (registration) {
-        query.where('registration', 'ilike', `%${registration}%`);
-    }
+            query.where('registration', 'ilike', `%${registration}%`);
+        }
 
     if (role) {
-        query.where('role', role);
-    }
+            const rolesArray = role.split(',');
+            query.whereIn('role', rolesArray);
+        }
 
   if (allowedUserIds) {
-    query.whereIn('id', allowedUserIds);
-  }
+            query.whereIn('id', allowedUserIds);
+        }
 
     const usersQuery = query
         .clone()
