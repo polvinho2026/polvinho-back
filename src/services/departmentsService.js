@@ -25,4 +25,37 @@ const createDepartment = async ({ title }) => {
     throw new Error('Todos os dígitos de 0 a 9 para este prefixo, ano e semestre já estão em uso.');
 };
 
-export default { createDepartment };
+const listDepartments = async (data) => {
+    const { page = 1, limit = 20, loggedUser } = data;
+
+    if (!loggedUser || (loggedUser.role !== 'admin' && loggedUser.role !== 'coordinator')) {
+        throw new Error('Não autorizado. Apenas administradores e coordenadores podem listar departamentos.');
+    }
+
+    const normalizedPage = Number(page);
+    let normalizedLimit = Number(limit);
+
+    if (!Number.isInteger(normalizedPage) || normalizedPage < 1) {
+        throw new Error('Página deve ser um número inteiro maior ou igual a 1.');
+    }
+
+    if (!Number.isInteger(normalizedLimit) || normalizedLimit < 1) {
+        throw new Error('Limite deve ser um número inteiro válido.');
+    }
+
+    if (normalizedLimit > 20) {
+        normalizedLimit = 20;
+    }
+
+    const departmentsData = await departmentsModel.list({
+        page: normalizedPage,
+        limit: normalizedLimit
+    });
+
+    return departmentsData;
+};
+
+export default { 
+    createDepartment,
+    listDepartments
+ };
