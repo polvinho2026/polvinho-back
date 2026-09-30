@@ -4,3 +4,4 @@ import departmentsController from "../controllers/departmentsController.js";
 export const departmentsRoutes = Router();
 
 departmentsRoutes.post('/', departmentsController.create);
+departmentsRoutes.get('/', departmentsController.list);
