@@ -1,5 +1,6 @@
 import departmentsModel from '../models/departmentsModel.js';
 import { generateEntityCode } from '../utils/generateEntityCode.js';
+import usersModel from '../models/usersModel.js';
 
 const createDepartment = async ({ title }) => {
     if (typeof title !== 'string' || !title.trim()) {
@@ -55,7 +56,32 @@ const listDepartments = async (data) => {
     return departmentsData;
 };
 
+const removeUserFromDepartment = async ({ departmentId, userId, loggedUser }) => {
+    
+    if (!loggedUser || loggedUser.role !== 'admin') {
+        throw new Error('Não autorizado. Apenas administradores podem remover usuários de um departamento.');
+    }
+
+    
+    const user = await usersModel.findById(userId);
+    if (!user) {
+        throw new Error('Usuário não encontrado.');
+    }
+
+
+    if (user.role !== 'coordinator') {
+        throw new Error('Somente coordenadores poderão ser removidos de um departamento.');
+    }
+
+    await departmentsModel.removeUser(departmentId, userId);
+
+    return { 
+        message: 'Coordenador removido do departamento. Seus vínculos com cursos e disciplinas foram encerrados.' 
+    };
+};
+
 export default { 
     createDepartment,
-    listDepartments
+    listDepartments,
+    removeUserFromDepartment
  };
