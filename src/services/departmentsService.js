@@ -56,6 +56,21 @@ const listDepartments = async (data) => {
     return departmentsData;
 };
 
+const showDepartment = async ({ id, loggedUser }) => {
+    if (!loggedUser || (loggedUser.role !== 'admin' && loggedUser.role !== 'coordinator')) {
+        throw new Error('Não autorizado. Apenas administradores e coordenadores podem visualizar departamentos.');
+    }
+
+    const department = await departmentsModel.findById(id);
+    if (!department) {
+        throw new Error('Departamento não encontrado.');
+    }
+
+    const users = await departmentsModel.findUsersByDepartmentId(id);
+
+    return { ...department, users };
+};
+
 const removeUserFromDepartment = async ({ departmentId, userId, loggedUser }) => {
     
     if (!loggedUser || loggedUser.role !== 'admin') {
@@ -83,5 +98,6 @@ const removeUserFromDepartment = async ({ departmentId, userId, loggedUser }) =>
 export default { 
     createDepartment,
     listDepartments,
+    showDepartment,
     removeUserFromDepartment
  };

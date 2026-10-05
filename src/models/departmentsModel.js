@@ -14,11 +14,13 @@ const list = async (params) => {
     const { page = 1, limit = 20 } = params;
     const offset = (page - 1) * limit;
 
-    const query = db(TABLE_NAME);
+    const query = db(TABLE_NAME).whereNull('deleted_at');
 
     const dataQuery = query
         .clone()
         .select('id', 'title', 'entity_code')
+        .orderBy('title', 'asc')
+        .orderBy('id', 'asc')
         .limit(limit)
         .offset(offset);
 
@@ -41,6 +43,25 @@ const list = async (params) => {
             totalPages
         }
     };
+};
+
+const findById = async (id) => {
+    return await db(TABLE_NAME)
+        .where({ id })
+        .whereNull('deleted_at')
+        .select('id', 'title', 'entity_code')
+        .first();
+};
+
+const findUsersByDepartmentId = async (departmentId) => {
+    return await db('users')
+        .join('users_departments', 'users.id', 'users_departments.user_id')
+        .where('users_departments.department_id', departmentId)
+        .whereNull('users_departments.deleted_at')
+        .whereNull('users.deleted_at')
+        .distinct('users.id', 'users.name', 'users.email', 'users.registration', 'users.role')
+        .orderBy('users.name', 'asc')
+        .orderBy('users.id', 'asc');
 };
 
 const removeUser = async (departmentId, userId) => {
@@ -86,5 +107,7 @@ const removeUser = async (departmentId, userId) => {
 export default {
     create,
     list,
+    findById,
+    findUsersByDepartmentId,
     removeUser
 };

@@ -30,6 +30,19 @@ const list = async (req, res) => {
     }
 };
 
+const show = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const loggedUser = { id: 'id-ficticio', role: 'admin' }; // Simulação até a autenticação ser implementada.
+
+        const department = await departmentsService.showDepartment({ id, loggedUser });
+
+        return res.status(200).json(department);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
 const removeUser = async (req, res) => {
     try {
         const { id: departmentId, userId } = req.params;
@@ -53,5 +66,6 @@ const removeUser = async (req, res) => {
 export default { 
     create,
     list,
+    show,
     removeUser
 };
