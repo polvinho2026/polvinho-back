@@ -95,9 +95,26 @@ const removeUserFromDepartment = async ({ departmentId, userId, loggedUser }) =>
     };
 };
 
+const deleteDepartment = async ({ id, loggedUser }) => {
+    
+    if (!loggedUser || loggedUser.role !== 'admin') {
+        throw new Error('Não autorizado. Apenas administradores podem excluir departamentos.');
+    }
+
+    const department = await departmentsModel.findById(id);
+    if (!department) {
+        throw new Error('Departamento não encontrado.');
+    }
+
+    await departmentsModel.remove(id);
+
+    return { message: 'Departamento e todos os seus vínculos foram excluídos com sucesso.' };
+};
+
 export default { 
     createDepartment,
     listDepartments,
     showDepartment,
-    removeUserFromDepartment
+    removeUserFromDepartment,
+    deleteDepartment
  };

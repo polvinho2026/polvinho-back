@@ -103,11 +103,68 @@ const removeUser = async (departmentId, userId) => {
     });
 };
 
+const remove = async (id) => {
+    return await db.transaction(async (trx) => {
+        const now = new Date();
+
+    
+        await trx(TABLE_NAME)
+            .where({ id })
+            .update({ deleted_at: now });
+
+        
+        await trx('users_departments')
+            .where({ department_id: id })
+            .update({ deleted_at: now });
+
+        
+        const courses = await trx('courses')
+            .select('id')
+            .where({ department_id: id })
+            .whereNull('deleted_at');
+
+        const courseIds = courses.map(c => c.id);
+
+        if (courseIds.length > 0) {
+           
+            await trx('courses')
+                .whereIn('id', courseIds)
+                .update({ deleted_at: now });
+
+            
+            await trx('users_courses')
+                .whereIn('course_id', courseIds)
+                .update({ deleted_at: now });
+
+            
+            const subjects = await trx('subjects')
+                .select('id')
+                .whereIn('course_id', courseIds)
+                .whereNull('deleted_at');
+
+            const subjectIds = subjects.map(s => s.id);
+
+            if (subjectIds.length > 0) {
+                await trx('subjects')
+                    .whereIn('id', subjectIds)
+                    .update({ deleted_at: now });
+
+                await trx('users_subjects')
+                    .whereIn('subject_id', subjectIds)
+                    .update({ deleted_at: now });
+            }
+        }
+
+        return true;
+    });
+};
+
 
 export default {
     create,
     list,
     findById,
     findUsersByDepartmentId,
-    removeUser
+    removeUser,
+    remove
 };
