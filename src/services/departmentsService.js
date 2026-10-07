@@ -27,7 +27,7 @@ const createDepartment = async ({ title }) => {
 };
 
 const listDepartments = async (data) => {
-    const { page = 1, limit = 20, loggedUser } = data;
+    const { page = 1, limit = 20, title, entity_code, loggedUser } = data;
 
     if (!loggedUser || (loggedUser.role !== 'admin' && loggedUser.role !== 'coordinator')) {
         throw new Error('Não autorizado. Apenas administradores e coordenadores podem listar departamentos.');
@@ -45,12 +45,14 @@ const listDepartments = async (data) => {
     }
 
     if (normalizedLimit > 20) {
-        normalizedLimit = 20;
+        normalizedLimit = 20; 
     }
 
     const departmentsData = await departmentsModel.list({
         page: normalizedPage,
-        limit: normalizedLimit
+        limit: normalizedLimit,
+        title,
+        entity_code
     });
 
     return departmentsData;

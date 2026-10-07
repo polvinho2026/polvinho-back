@@ -12,16 +12,18 @@ const create = async (req, res) => {
 
 const list = async (req, res) => {
     try {
-        const { page, limit } = req.query; 
-
-        const loggedUser = { id: 'id-ficticio', role: 'admin' }; 
+        const { page, limit, title, entity_code } = req.query; 
+        
+        const loggedUser = req.loggedUser || { id: 'id-ficticio', role: 'admin' }; 
 
         const departments = await departmentsService.listDepartments({
             page,
             limit,
+            title,
+            entity_code,
             loggedUser
         });
-
+        
         return res.status(200).json(departments);
     } catch (error) {
         return res.status(400).json({
