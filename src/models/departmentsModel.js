@@ -11,10 +11,18 @@ const create = async (departmentData) => {
 };
 
 const list = async (params) => {
-    const { page = 1, limit = 20 } = params;
+    const { page = 1, limit = 20, title, entity_code } = params;
     const offset = (page - 1) * limit;
-
+    
     const query = db(TABLE_NAME).whereNull('deleted_at');
+
+    if (title) {
+        query.where('title', 'ilike', `%${title}%`);
+    }
+
+    if (entity_code) {
+        query.where('entity_code', 'ilike', `%${entity_code}%`);
+    }
 
     const dataQuery = query
         .clone()
@@ -24,21 +32,21 @@ const list = async (params) => {
         .limit(limit)
         .offset(offset);
 
-        const countQuery = query
+    const countQuery = query
         .clone()
         .count({ total: 'id' })
         .first();
 
-        const [departments, countResult] = await Promise.all([dataQuery, countQuery]);
-    
+    const [departments, countResult] = await Promise.all([dataQuery, countQuery]);
+
     const totalItems = Number(countResult.total);
     const totalPages = Math.max(1, Math.ceil(totalItems / limit));
 
     return {
         data: departments,
         pagination: {
-            page,
-            limit,
+            page: Number(page),
+            limit: Number(limit),
             totalItems,
             totalPages
         }
