@@ -16,12 +16,12 @@ const list = async (params) => {
     
     const query = db(TABLE_NAME).whereNull('deleted_at');
 
+    
     if (title) {
-        query.where('title', 'ilike', `%${title}%`);
-    }
-
-    if (entity_code) {
-        query.where('entity_code', 'ilike', `%${entity_code}%`);
+        query.where(function() {
+            this.where('title', 'ilike', `%${title}%`)
+                .orWhere('entity_code', 'ilike', `%${title}%`);
+        });
     }
 
     const dataQuery = query
