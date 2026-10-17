@@ -108,6 +108,8 @@ const showUser = async ({ id, loggedUser }) => {
     const baseData = {
         name: userData.name,
         email: userData.email,
+        birth_date: userData.birth_date,
+        cpf: userData.cpf,
         registration: userData.registration,
         role: userData.role,
         course: course ? course.title : 'Sem curso',
