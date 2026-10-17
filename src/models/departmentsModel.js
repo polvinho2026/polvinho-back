@@ -167,6 +167,22 @@ const remove = async (id) => {
     });
 };
 
+const queryUserDep = async(departmentId, userId) =>{
+    return await db('users_departments')
+        .where({department_id: departmentId, user_id: userId})
+        .whereNull('deleted_at')
+        .select('department_id', 'user_id')
+        .first()
+}
+
+const addUserDep = async(departmentId, userId) =>{
+    const [newUserDepartment] = await db('users_departments')
+    .insert({department_id: departmentId, user_id: userId})
+    .returning('*')
+
+    return newUserDepartment
+}
+
 
 export default {
     create,
@@ -174,5 +190,7 @@ export default {
     findById,
     findUsersByDepartmentId,
     removeUser,
-    remove
+    remove,
+    queryUserDep,
+    addUserDep
 };
