@@ -85,10 +85,31 @@ const remove = async (req, res) => {
     }
 };
 
+const addUser = async (req, res) =>{
+    try{
+        const {id: departmentId, userId} = req.params;
+
+        const loggedUser = {id: 'id-ficticio-do-admin', role: 'admin'};
+
+        const result = await departmentsService.addUserDepartment({
+            departmentId,
+            userId,
+            loggedUser
+        })
+
+        return res.status(201).json(result);
+    }catch(error){
+        return res.status(400).json({
+            message: error.message
+        });
+    }
+};
+
 export default { 
     create,
     list,
     show,
     removeUser,
-    remove
+    remove,
+    addUser
 };

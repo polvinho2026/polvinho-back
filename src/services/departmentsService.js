@@ -113,10 +113,41 @@ const deleteDepartment = async ({ id, loggedUser }) => {
     return { message: 'Departamento e todos os seus vínculos foram excluídos com sucesso.' };
 };
 
+const addUserDepartment = async ({departmentId, userId, loggedUser}) =>{
+
+    if(!loggedUser || loggedUser.role !== 'admin'){
+        throw new Error('Não autorizado. Apenas administradores podem adicionar usuários no departamento.')
+    }
+
+    const department = await departmentsModel.findById(departmentId);
+    if(!department){
+        throw new Error('Departamento não encontrado.')
+    }
+
+    const user = await usersModel.findById(userId);
+    if(!user){
+        throw new Error('Usuário não encontrado.')
+    }
+
+    if(user.role !== 'coordinator'){
+        throw new Error('Somente coordenadores poderão ser adicionados ao departamento.')
+    }
+
+    const userFromDepartment = await departmentsModel.queryUserDep(departmentId, userId);
+    if(userFromDepartment){
+        throw new Error('Este usuário já está vinculado a este departamento.')
+    }
+
+    await departmentsModel.addUserDep(departmentId, userId)
+
+    return {message: 'Usuário vinculado ao departamento com sucesso.'}
+}
+
 export default { 
     createDepartment,
     listDepartments,
     showDepartment,
     removeUserFromDepartment,
-    deleteDepartment
+    deleteDepartment,
+    addUserDepartment
  };
