@@ -143,11 +143,68 @@ const addUserDepartment = async ({departmentId, userId, loggedUser}) =>{
     return {message: 'Usuário vinculado ao departamento com sucesso.'}
 }
 
+const updateDepartment = async({id, title, entity_code, loggedUser}) =>{
+
+    if(!loggedUser || loggedUser.role !== 'admin'){
+        throw new Error('Não autorizado. Apenas administradores podem editar departamentos.')
+    };
+
+    if(title === undefined && entity_code === undefined){
+        throw new Error('Pelo menos um campo deve ser informado para edição.')
+    };
+
+    const department = await departmentsModel.findById(id)
+
+    if(!department){
+        throw new Error('Departamento não encontrado.')
+    }
+
+    let normalizedTitle = title
+    if(title !== undefined){
+        if (typeof title !== 'string' || !title.trim()) {
+            throw new Error('Nome do departamento é obrigatório.');
+        };
+
+        normalizedTitle = title.trim()
+        if (normalizedTitle.length > 100) {
+        throw new Error('Nome do departamento deve conter no máximo 100 caracteres.');
+        }
+    };
+    
+    let normalizedEntityCode = entity_code
+    if(entity_code !== undefined){
+        if(typeof entity_code !== 'string'){
+            throw new Error('O código da entidade deve ser um texto')
+        };
+        normalizedEntityCode = entity_code.trim()
+
+        const entityCodeRegex = /^[A-Z]{3}\d{2}(01|02)-\d$/;
+        const isValidEntityCode = entityCodeRegex.test(normalizedEntityCode);
+    
+        if(isValidEntityCode === false){
+       throw new Error('O código de entidade do departamento está no formato incorreto. ')
+        };
+
+        const entityCode = await departmentsModel.queryEntityCode(normalizedEntityCode)
+
+        if(entityCode){
+            if(entityCode.id !== id){
+            throw new Error('O código de entidade já está em uso')
+            }
+        };   
+    };
+
+    await departmentsModel.update(id, normalizedTitle, normalizedEntityCode);
+
+    return {message: 'Departamento editado com sucesso.'};
+};
+
 export default { 
     createDepartment,
     listDepartments,
     showDepartment,
     removeUserFromDepartment,
     deleteDepartment,
-    addUserDepartment
+    addUserDepartment,
+    updateDepartment
  };
