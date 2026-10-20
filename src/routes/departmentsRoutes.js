@@ -10,3 +10,4 @@ departmentsRoutes.delete('/:id/users/:userId', departmentsController.removeUser)
 departmentsRoutes.delete('/:id', departmentsController.remove);
 departmentsRoutes.get('/', departmentsController.list);
 departmentsRoutes.post('/:id/users/:userId', departmentsController.addUser);
+departmentsRoutes.put('/:id', departmentsController.update)
