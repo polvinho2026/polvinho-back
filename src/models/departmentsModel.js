@@ -182,6 +182,34 @@ const addUserDep = async(departmentId, userId) =>{
 
     return newUserDepartment
 }
+const queryEntityCode = async(entity_code) =>{
+    return await db(TABLE_NAME)
+    .where({entity_code})
+    .select('id', 'entity_code')
+    .first()
+}
+
+const update = async(id, title, entity_code) =>{
+    const editDep= {}
+    const now = new Date()
+
+    if(title !== undefined){
+        editDep['title'] = title
+    }
+    if(entity_code !== undefined){
+        editDep['entity_code'] = entity_code
+    }
+   
+    editDep['updated_at'] = now
+
+    const [updateDep] = await db(TABLE_NAME)
+    .where({id})
+    .whereNull('deleted_at')
+    .update(editDep)
+    .returning(Object.keys(editDep))
+
+    return updateDep;
+};
 
 
 export default {
@@ -192,5 +220,7 @@ export default {
     removeUser,
     remove,
     queryUserDep,
-    addUserDep
+    addUserDep,
+    queryEntityCode,
+    update
 };

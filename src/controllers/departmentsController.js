@@ -105,11 +105,34 @@ const addUser = async (req, res) =>{
     }
 };
 
+const update = async (req, res)=>{
+    try{
+        const {id} = req.params
+        const {title, entity_code} = req.body
+
+        const loggedUser = {id: 'id-ficticio-do-admin', role: 'admin'};
+
+        const result = await departmentsService.updateDepartment({
+            id,
+            title,
+            entity_code,
+            loggedUser
+        })
+
+        return res.status(200).json(result)
+    }catch(error){
+        return res.status(400).json({
+            message: error.message
+        })
+    }
+}
+
 export default { 
     create,
     list,
     show,
     removeUser,
     remove,
-    addUser
+    addUser,
+    update
 };
