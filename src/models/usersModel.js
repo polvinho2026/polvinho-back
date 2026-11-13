@@ -23,6 +23,24 @@ const findByRegistration = async (registration) => {
     return await db(TABLE_NAME).where({ registration }).first();
 };
 
+const findByIdentifier = async (identifier) => {
+    const value = identifier.trim();
+
+    if (value.includes('@')) {
+        return db(TABLE_NAME)
+            .whereRaw('lower(email) = ?', [value.toLowerCase()])
+            .first();
+    }
+
+    const cpf = value.replace(/\D/g, '');
+
+    if (cpf.length !== 11) {
+        return undefined;
+    }
+
+    return findByCPF(cpf);
+};
+
 const findColleaguesIds = async (userId) => {
     const userSubjectsQuery = db('users_subjects')
          .select('subject_id')
@@ -164,5 +182,6 @@ export default {
     update,
     remove, 
     findCourseByUserId,
-    findSubjectsByUserId
+    findSubjectsByUserId,
+    findByIdentifier
 };

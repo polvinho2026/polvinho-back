@@ -2,10 +2,19 @@ import usersModel from '../models/usersModel.js';
 import { validateCPF } from '../utils/validateCPF.js';
 import { validateDateISO } from '../utils/validateDateISO.js';
 import bcrypt from 'bcrypt';
+import { httpError } from '../utils/httpError.js';
 
 
-const createUser = async ({ name, email, cpf, birth_date, registration, role }) => {
+const createUser = async ({ name, email, cpf, birth_date, registration, role, loggedUser }) => {
     const allNames = name.split(' ');
+
+    if (!loggedUser) {
+    throw httpError('Não autenticado.', 401);
+    }
+
+    if (loggedUser.role !== 'admin') {
+    throw httpError('Apenas administradores podem criar usuários.', 403);
+    }
 
     if (!allNames[1]) {
         throw new Error('Nome e sobrenome são obrigatórios.');
