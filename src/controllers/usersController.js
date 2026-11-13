@@ -19,7 +19,8 @@ const create = async (req, res) => {
             cpf,
             birth_date,
             registration,
-            role
+            role,
+            loggedUser: req.loggedUser
         });
 
         return res.status(201).json(newUser);
@@ -32,11 +33,11 @@ const create = async (req, res) => {
 
 const list = async (req, res) => {
     try {
-        // pegando os filtros da URL 
+        
         const { page, limit, name, registration, role, includeExcluded } = req.query;
         
-        // será usado depois para verificar se o usuário logado tem permissão de ver todos os usuários ou apenas os que ele tem acesso (autenticação)
-        const loggedUser = { id: 1, role: 'admin' }; 
+        
+        const loggedUser = req.loggedUser;
 
         const users = await usersService.listUsers({
             page,
@@ -60,14 +61,7 @@ const list = async (req, res) => {
 const show = async (req, res) => {
     const { id } = req.params 
 
-    const loggedUser = {
-        email: 'ramiro@gmail.com',
-        name: 'Ronaldo Fenomeno',
-        cpf: '03857682060',
-        registration: '1234567890',
-        birth_date: '2002-02-02',
-        role: 'student',
-    }
+    const loggedUser = req.loggedUser;
 
     try {
         const userData = await usersService.showUser({id, loggedUser})
@@ -87,10 +81,7 @@ const update = async (req, res) => {
     const { id } = req.params 
     const { name, email, cpf, birth_date, registration, role } = req.body;
 
-    const loggedUser = { // simulação de administrador logado, para teste
-            id: 'id-ficticio-do-admin', 
-            role: 'admin' 
-        };
+    const loggedUser = req.loggedUser;
 
     const updatedUser = await usersService.updateUser({
             id,
@@ -115,13 +106,9 @@ const update = async (req, res) => {
 const remove = async (req, res) => {
     try {
         const { id } = req.params;
-        
-       // SIMULAÇÃO DE USUÁRIO LOGADO (ADMINISTRADOR) PARA TESTE
-        const loggedUser = { 
-            id: 'id-ficticio-do-admin', 
-            role: 'admin' 
-        };
 
+        const loggedUser = req.loggedUser;
+        
         const result = await usersService.deleteUser({ id, loggedUser });
         return res.status(200).json(result);
     } catch (error) {

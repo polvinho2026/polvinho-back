@@ -14,7 +14,7 @@ const list = async (req, res) => {
     try {
         const { page, limit, title, entity_code } = req.query; 
         
-        const loggedUser = req.loggedUser || { id: 'id-ficticio', role: 'admin' }; 
+        const loggedUser = req.loggedUser;
 
         const departments = await departmentsService.listDepartments({
             page,
@@ -35,9 +35,8 @@ const list = async (req, res) => {
 const show = async (req, res) => {
     try {
         const { id } = req.params;
-        const loggedUser = { id: 'id-ficticio', role: 'admin' }; // Simulação até a autenticação ser implementada.
 
-        const department = await departmentsService.showDepartment({ id, loggedUser });
+        const loggedUser = req.loggedUser;
 
         return res.status(200).json(department);
     } catch (error) {
@@ -48,8 +47,8 @@ const show = async (req, res) => {
 const removeUser = async (req, res) => {
     try {
         const { id: departmentId, userId } = req.params;
-        
-        const loggedUser = { id: 'id-ficticio-do-admin', role: 'admin' }; 
+
+        const loggedUser = req.loggedUser;
 
         const result = await departmentsService.removeUserFromDepartment({
             departmentId,
@@ -68,10 +67,9 @@ const removeUser = async (req, res) => {
 const remove = async (req, res) => {
     try {
         const { id } = req.params;
-        
-        
-        const loggedUser = { id: 'id-ficticio-do-admin', role: 'admin' }; 
 
+        const loggedUser = req.loggedUser;
+        
         const result = await departmentsService.deleteDepartment({ 
             id, 
             loggedUser 
@@ -89,7 +87,7 @@ const addUser = async (req, res) =>{
     try{
         const {id: departmentId, userId} = req.params;
 
-        const loggedUser = {id: 'id-ficticio-do-admin', role: 'admin'};
+        const loggedUser = req.loggedUser;
 
         const result = await departmentsService.addUserDepartment({
             departmentId,
